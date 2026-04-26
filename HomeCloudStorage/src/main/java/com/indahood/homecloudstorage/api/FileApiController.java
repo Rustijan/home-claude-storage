@@ -17,14 +17,16 @@ import java.util.stream.StreamSupport;
 @RequestMapping("/api")
 public class FileApiController {
     @GetMapping("/files")
-    public List<String> listFiles() throws IOException {
+    public List<String> listFiles(@org.springframework.web.bind.annotation.RequestHeader("X-User-Name") String username) throws IOException {
         try (DirectoryStream<Path> stream =
-                     Files.newDirectoryStream(Path.of(FileStorageService.STORAGE_DIRECTORY))) {
+                     Files.newDirectoryStream(Path.of(FileStorageService.STORAGE_DIRECTORY, username))) {
 
         return StreamSupport.stream(stream.spliterator(), false)
                 .map(Path::getFileName)
                 .map(Path::toString)
                 .toList();
+        } catch (java.nio.file.NoSuchFileException e) {
+            return List.of(); // Return empty list if user hasn't uploaded anything yet
         }
     }
 

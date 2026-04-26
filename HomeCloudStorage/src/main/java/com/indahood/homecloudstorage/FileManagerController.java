@@ -29,9 +29,9 @@ public class FileManagerController {
 
 
     @PostMapping("/upload-file")
-    public boolean uploadfile(@RequestParam("file") MultipartFile file) {
+    public boolean uploadfile(@RequestParam("file") MultipartFile file, @org.springframework.web.bind.annotation.RequestHeader("X-User-Name") String username) {
         try {
-            fileStorageService.saveFile(file);
+            fileStorageService.saveFile(file, username);
             return true;
         } catch (IOException e) {
 //            throw new RuntimeException(e);
@@ -41,26 +41,26 @@ public class FileManagerController {
     }
 
     @GetMapping("/Download")
-    public ResponseEntity<Resource> downloadFile(@RequestParam("filename") String filename) {
+    public ResponseEntity<Resource> downloadFile(@RequestParam("filename") String filename, @org.springframework.web.bind.annotation.RequestHeader("X-User-Name") String username) {
         try {
             
-            var fileToDownload = fileStorageService.getDownloadFile(filename);
+            var fileToDownload = fileStorageService.getDownloadFile(filename, username);
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename= \"" + filename + "\"")
                     .contentLength(fileToDownload.length())
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
                     .body(new InputStreamResource(Files.newInputStream(fileToDownload.toPath())));
         } catch (Exception e) {
-//            throw new RuntimeException;
+            log.log(Level.SEVERE, "Exception during download", e);
             return ResponseEntity.notFound().build();
         }
     }
 
     //        multipart download
     @GetMapping("/Download-faster")
-    public ResponseEntity<Resource> downloadFileFaster(@RequestParam("filename") String filename) {
+    public ResponseEntity<Resource> downloadFileFaster(@RequestParam("filename") String filename, @org.springframework.web.bind.annotation.RequestHeader("X-User-Name") String username) {
         try {
-            var fileToDownload = fileStorageService.getDownloadFile(filename);
+            var fileToDownload = fileStorageService.getDownloadFile(filename, username);
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename= \"" + filename + "\"")
                     .contentLength(fileToDownload.length())

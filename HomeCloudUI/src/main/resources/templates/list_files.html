@@ -55,7 +55,13 @@
 </head>
 <body>
 <div class="container">
-    <h1>File List</h1>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1 style="margin: 0;">File List</h1>
+        <div>
+            <a th:href="@{/uploader}" style="padding: 8px 15px; background: #4CAF50; color: white; text-decoration: none; border-radius: 5px; margin-right: 10px;">Upload File</a>
+            <a th:href="@{/logout}" style="padding: 8px 15px; background: #f44336; color: white; text-decoration: none; border-radius: 5px;">Logout</a>
+        </div>
+    </div>
     <table>
         <thead>
         <tr>

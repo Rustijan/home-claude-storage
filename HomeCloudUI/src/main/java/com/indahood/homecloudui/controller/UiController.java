@@ -19,20 +19,16 @@ public class UiController {
 
     // UI page for listing files
     @GetMapping("/list-files")
-    public String listFiles(Model model) {
-        model.addAttribute("files", storageClient.getFiles());
+    public String listFiles(Model model, java.security.Principal principal) {
+        model.addAttribute("files", storageClient.getFiles(principal.getName()));
         return "list_files"; // list-files.html
     }
 
     // UI download endpoint (browser calls UI, UI calls storage)
     @GetMapping("/Download")
-    public ResponseEntity<byte[]> download(@RequestParam String filename) {
-        byte[] data = storageClient.downloadFile(filename);
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + filename + "\"")
-                .body(data);
+    public void download(@RequestParam String filename, jakarta.servlet.http.HttpServletResponse response, java.security.Principal principal) throws java.io.IOException {
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"");
+        storageClient.downloadFile(filename, principal.getName(), response.getOutputStream());
     }
 
     // UI upload page
@@ -41,10 +37,9 @@ public class UiController {
         return "uploader"; // uploader.html
     }
 
-    // UI upload handler (forwards to storage)
     @PostMapping("/upload-file")
-    public String upload(@RequestParam("file") MultipartFile file) throws Exception {
-        storageClient.uploadFile(file.getBytes(), file.getOriginalFilename());
+    public String upload(@RequestParam("file") MultipartFile file, java.security.Principal principal) throws Exception {
+        storageClient.uploadFile(file.getResource(), file.getOriginalFilename(), principal.getName());
         return "redirect:/list-files";
     }
 }

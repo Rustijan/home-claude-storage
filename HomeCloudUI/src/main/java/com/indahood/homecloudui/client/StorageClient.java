@@ -28,33 +28,44 @@ public class StorageClient {
 //    private final String STORAGE_URL = "https://dispiteously-overelliptical-brady.ngrok-free.dev";
 
     // Call: GET http://localhost:8080/list-files
-    public List<String> getFiles() {
-        return restTemplate.getForObject(
+    public List<String> getFiles(String username) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("X-User-Name", username);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        return restTemplate.exchange(
                 STORAGE_URL + "/api/files",
+                HttpMethod.GET,
+                entity,
                 List.class
-        );
+        ).getBody();
     }
 
     // Call: GET http://localhost:8080/Download?filename=x
-    public byte[] downloadFile(String filename) {
-        return restTemplate.getForObject(
+    public void downloadFile(String filename, String username, java.io.OutputStream outputStream) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("X-User-Name", username);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        restTemplate.execute(
                 STORAGE_URL + "/Download?filename=" + filename,
-                byte[].class
+                HttpMethod.GET,
+                request -> request.getHeaders().add("X-User-Name", username),
+                clientHttpResponse -> {
+                    org.springframework.util.StreamUtils.copy(clientHttpResponse.getBody(), outputStream);
+                    return null;
+                }
         );
     }
-    public void uploadFile(byte[] data, String filename) {
+
+    public void uploadFile(org.springframework.core.io.Resource fileResource, String filename, String username) {
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
 
-        body.add("file", new ByteArrayResource(data) {
-            @Override
-            public String getFilename() {
-                return filename;
-            }
-        });
+        body.add("file", fileResource);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        headers.add("X-User-Name", username);
 
         HttpEntity<MultiValueMap<String, Object>> request =
                 new HttpEntity<>(body, headers);

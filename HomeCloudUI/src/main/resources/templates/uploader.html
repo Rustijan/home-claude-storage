@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -56,7 +56,10 @@
     <h1>Upload Your File</h1>
     <form id="uploadForm">
         <input type="file" id="fileInput" name="file" required>
-        <button type="submit">Upload</button>
+        <div style="margin-top: 10px;">
+            <button type="submit">Upload</button>
+            <a th:href="@{/list-files}" style="padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 5px; margin-left: 10px; display: inline-block;">Back to Files</a>
+        </div>
     </form>
     <div id="status"></div>
 </div>
